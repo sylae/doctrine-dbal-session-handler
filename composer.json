@@ -1,0 +1,24 @@
+{
+    "name": "sylae/doctrine-dbal-session-handler",
+    "description": "SessionHandlerInterface implementation using doctrine/dbal",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "": "src/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    },
+    "authors": [
+        {
+            "name": "Keira Dueck",
+            "email": "sylae@calref.net"
+        }
+    ],
+    "require": {
+        "doctrine/dbal": "^3.4"
+    }
+}
