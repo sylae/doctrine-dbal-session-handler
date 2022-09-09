@@ -7,16 +7,20 @@
 
 namespace Doctrine\DBAL;
 
+use Doctrine\DBAL\Types\Types;
+
 class DBALSessionHandler implements
     \SessionUpdateTimestampHandlerInterface, \SessionHandlerInterface, \SessionIdInterface
 {
 
     /**
-     * @var callable returns ?int
+     * @var callable returns ?int or the type given to setUserIDType()
      */
     protected $userIDHandler = null;
 
     protected string $sessionTable = "sessions";
+
+    protected string $userIDType = Types::INTEGER;
 
     public function __construct(protected Connection $db)
     {
@@ -42,7 +46,7 @@ class DBALSessionHandler implements
         return (bool)$this->db->executeStatement(
             "replace into {$this->sessionTable} (idSession, data, ip, userAgent, idUser) VALUES (?, ?, ?, ?, ?)",
             [$id, $data, $this->getIP(), $this->getUserAgent(), $this->getUserID()],
-            ['string', 'string', 'string', 'string', 'integer']
+            ['string', 'string', 'string', 'string', $this->userIDType]
         ); // todo: use querybuilder for this
     }
 
@@ -56,7 +60,7 @@ class DBALSessionHandler implements
         return $_SERVER['HTTP_USER_AGENT'] ?? null;
     }
 
-    protected function getUserID(): ?int
+    protected function getUserID()
     {
         return call_user_func($this->userIDHandler) ?? null;
     }
@@ -112,7 +116,7 @@ class DBALSessionHandler implements
     }
 
     /**
-     * @param callable $userIDHandler a callable that returns an integer or null
+     * @param callable $userIDHandler a callable that returns an integer or null. can change int to something else with setUserIDType()
      */
     public function setUserIDHandler(callable $userIDHandler)
     {
@@ -122,5 +126,14 @@ class DBALSessionHandler implements
     public function setSessionTable(string $sessionTable): void
     {
         $this->sessionTable = $sessionTable;
+    }
+
+    /**
+     * set what your user ID is (defaults to integer). should be one of those in Doctrine\DBAL\Types\Types
+     * @param string $userIDType
+     */
+    public function setUserIDType(string $userIDType)
+    {
+        $this->userIDType = $userIDType;
     }
 }
